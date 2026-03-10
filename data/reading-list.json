@@ -25,20 +25,20 @@
     "hidden": false,
     "pdf": "pdfs/s41562-022-01516-2.pdf",
     "url": "https://doi.org/10.1038/s41562-022-01516-2",
-    "notes": "MUST READ"
+    "notes": "Considerable progress has recently been made in natural language processing: deep learning algorithms are increasingly able to generate, summarize, translate and classify texts. Yet, these language models still fail to match the language abilities of humans. Predictive coding theory offers a tentative explanation to this discrepancy: while language models are optimized to predict nearby words, the human brain would continuously predict a hierarchy of representations that spans multiple timescales. To test this hypothesis, we analysed the functional magnetic resonance imaging brain signals of 304 participants listening to short stories. First, we confirmed that the activations of modern language models linearly map onto the brain responses to speech. Second, we showed that enhancing these algorithms with predictions that span multiple timescales improves this brain mapping. Finally, we showed that these predictions are organized hierarchically: frontoparietal cortices predict higher-level, longer-range and more contextual representations than temporal cortices. Overall, these results strengthen the role of hierarchical predictive coding in language processing and illustrate how the synergy between neuroscience and artificial intelligence can unravel the computational bases of human cognition."
   },
   {
     "id": 3,
     "title": "Temporal structure of natural language processing in the human brain corresponds to layered hierarchy of large language models",
-    "authors": "Caucheteu et al.",
-    "year": 2023,
-    "journal": "Nature Human Behavior",
-    "categories": ["attention", "fMRI", "BERT"],
+    "authors": "Goldstein et al.",
+    "year": 2025,
+    "journal": "Nature Comm",
+    "categories": ["attention", "fMRI", "GPT-2"],
     "priority": "red",
     "completed": false,
     "hidden": false,
     "pdf": "pdfs/s41467-025-65518-0.pdf",
     "url": "https://doi.org/10.1038/s41467-025-65518-0",
-    "notes": "MUST READ"
+    "notes": "Large Language Models (LLMs) offer a framework for understanding language processing in the human brain. Unlike traditional models, LLMs represent words and context through layered numerical embeddings. Here, we demonstrate that LLMs’ layer hierarchy aligns with the temporal dynamics of language comprehension in the brain. Using electrocorticography (ECoG) data from participants listening to a 30-minute narrative, we show that deeper LLM layers correspond to later brain activity, particularly in Broca’s area and other language-related regions. We extract contextual embeddings from GPT-2 XL and Llama-2 and use linear models to predict neural responses across time. Our results reveal a strong correlation between model depth and the brain’s temporal receptive window during comprehension. We also compare LLM- based predictions with symbolic approaches, highlighting the advantages of deep learning models in capturing brain dynamics. We release our aligned neural and linguistic dataset as a public benchmark to test competing theories of language processing."
   }
   ]
