@@ -194,7 +194,7 @@ function renderTable() {
 
   if (!filtered.length) {
     tbody.innerHTML = `
-      <tr><td colspan="8">
+      <tr><td colspan="9">
         <div class="empty-state">
           <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
             <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -217,6 +217,21 @@ function renderTable() {
       ? `<button class="action-btn show-btn" onclick="toggleHidden(${item.id})" title="Make visible">Show</button>`
       : `<button class="action-btn hide-btn" onclick="toggleHidden(${item.id})" title="Hide this entry">Hide</button>`;
 
+    const notes = item.notes || '';
+    const isLong = notes.length > 40;
+    const expanded = item._notesExpanded || false;
+    const notesHtml = notes
+      ? `<div class="notes-content ${expanded ? 'notes-expanded' : 'notes-collapsed'}">
+          <span class="notes-body">${esc(notes)}</span>
+          ${isLong ? `<button class="notes-toggle" onclick="toggleNotes(${item.id})">
+            ${expanded ? '折りたたむ' : '続きを見る'}
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <polyline points="2 3 5 7 8 3"/>
+            </svg>
+          </button>` : ''}
+        </div>`
+      : `<span style="color:var(--text-dim);font-size:12px">—</span>`;
+
     return `
       <tr class="${item.completed ? 'completed' : ''} ${item.hidden ? 'hidden-entry' : ''}" data-id="${item.id}">
         <td>
@@ -234,6 +249,7 @@ function renderTable() {
           <span class="authors-text">${esc(item.authors || '')}</span>
         </td>
         <td class="hide-mobile"><span class="year-text">${item.year || '—'}</span></td>
+        <td class="hide-mobile"><span class="journal-text">${esc(item.journal || '—')}</span></td>
         <td class="hide-mobile">
           <div class="category-group">${catBadges}</div>
         </td>
@@ -253,7 +269,7 @@ function renderTable() {
               : `<span class="link-btn url disabled">URL</span>`}
           </div>
         </td>
-        <td class="hide-mobile"><span class="notes-text">${esc(item.notes || '')}</span></td>
+        <td class="hide-mobile notes-cell">${notesHtml}</td>
         <td>
           <div class="row-actions">${hideBtn}</div>
         </td>
@@ -281,6 +297,14 @@ function toggleHidden(id) {
   if (!item) return;
   item.hidden = !item.hidden;
   save(); renderAll();
+}
+
+function toggleNotes(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item._notesExpanded = !item._notesExpanded;
+  // Re-render only the table (no save needed — _notesExpanded is UI state only)
+  renderTable();
 }
 
 function toggleShowHidden() {

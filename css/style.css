@@ -12,9 +12,9 @@
   --surface2:     #F0ECE2;
   --border:       #DFD3C3;
   --border2:      #C7B198;
-  --text:         #2a2420;
-  --text-muted:   #596E79;
-  --text-dim:     #8fa0a8;
+  --text:         #1a1410;
+  --text-muted:   #3d5260;
+  --text-dim:     #596E79;
   --accent:       #596E79;
   --accent2:      #7d5c45;
   --accent-light: rgba(89,110,121,0.10);
@@ -47,9 +47,9 @@
   --surface2:     #292d38;
   --border:       #2e3240;
   --border2:      #3a3f52;
-  --text:         #e8e2d8;
-  --text-muted:   #9aa0b0;
-  --text-dim:     #5a6070;
+  --text:         #f0ebe2;
+  --text-muted:   #b8c0cc;
+  --text-dim:     #7a8696;
   --accent:       #C7B198;
   --accent2:      #DFD3C3;
   --accent-light: rgba(199,177,152,0.10);
@@ -175,7 +175,7 @@ h1 em {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -266,8 +266,8 @@ h1 em {
 .progress-label {
   font-family: 'Lato', sans-serif;
   font-size: 11px;
-  font-weight: 400;
-  color: var(--text-dim);
+  font-weight: 700;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -373,7 +373,7 @@ option { background: var(--surface2); }
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-muted);
   margin-right: 3px;
 }
 
@@ -432,7 +432,7 @@ th {
   font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-muted);
   padding: 11px 16px;
   text-align: left;
   font-weight: 700;
@@ -526,15 +526,15 @@ td { padding: 13px 16px; vertical-align: middle; }
 .authors-text {
   font-size: 12px;
   color: var(--text-muted);
-  font-weight: 300;
+  font-weight: 400;
 }
 
 /* ── Year ─────────────────────────────────── */
 .year-text {
   font-family: 'Lato', sans-serif;
   font-size: 13px;
-  font-weight: 400;
-  color: var(--text-dim);
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 /* ── Category badges — multiple ───────────── */
@@ -637,18 +637,79 @@ td { padding: 13px 16px; vertical-align: middle; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 300;
+  font-weight: 400;
 }
 
+/* ── Journal ──────────────────────────────── */
+.journal-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  display: block;
+}
+
+/* ── Notes expand/collapse ────────────────── */
+.notes-cell { max-width: 200px; }
+
+.notes-content {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.notes-collapsed .notes-body {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+  display: block;
+}
+
+.notes-expanded .notes-body {
+  white-space: normal;
+  display: block;
+  max-width: 220px;
+  word-break: break-word;
+}
+
+.notes-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0;
+  transition: opacity var(--transition);
+}
+
+.notes-toggle:hover { opacity: 0.7; }
+
+.notes-toggle svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notes-expanded .notes-toggle svg { transform: rotate(180deg); }
+
 /* ═══════════════════════════════════════════════════
-   EMPTY STATE
 ═══════════════════════════════════════════════════ */
 .empty-state {
   text-align: center;
   padding: 72px 24px;
 }
 
-.empty-state svg { color: var(--text-dim); margin-bottom: 14px; }
+.empty-state svg { color: var(--text-muted); margin-bottom: 14px; }
 
 .empty-state h3 {
   font-size: 17px;
@@ -657,7 +718,7 @@ td { padding: 13px 16px; vertical-align: middle; }
   margin-bottom: 6px;
 }
 
-.empty-state p { font-size: 13px; color: var(--text-dim); }
+.empty-state p { font-size: 13px; color: var(--text-muted); }
 
 /* ═══════════════════════════════════════════════════
    SCROLLBAR
