@@ -1,32 +1,81 @@
 // ─── STATE ─────────────────────────────────────────────────────────────────
 let items = [];
-let editingId = null;
 let sortKey = 'priority';
 let sortDir = 1;
 let filterPriority = 'all';
 let filterCategory = 'all';
 let filterCompleted = 'all';
 let searchQuery = '';
+let showHidden = false;
 
 const PRIORITY_ORDER = { red: 0, yellow: 1, green: 2 };
-const LOCAL_KEY = 'reading-list-v1';
+const LOCAL_KEY = 'reading-list-v2';
+const THEME_KEY = 'reading-list-theme';
+
+// Category color cycling (mod 5 matching CSS .cat-0 … .cat-4)
+const CAT_COLORS = ['cat-0','cat-1','cat-2','cat-3','cat-4'];
+let _catColorMap = {};
+let _catColorIdx = 0;
+
+function getCatColor(cat) {
+  if (!_catColorMap[cat]) {
+    _catColorMap[cat] = CAT_COLORS[_catColorIdx % CAT_COLORS.length];
+    _catColorIdx++;
+  }
+  return _catColorMap[cat];
+}
+
+// ─── THEME ─────────────────────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || 'day';
+  applyTheme(saved);
+}
+
+function applyTheme(mode) {
+  document.documentElement.dataset.theme = mode === 'night' ? 'night' : '';
+  const label = document.getElementById('theme-label');
+  if (label) label.textContent = mode === 'night' ? 'Night' : 'Day';
+  localStorage.setItem(THEME_KEY, mode);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.dataset.theme;
+  applyTheme(current === 'night' ? 'day' : 'night');
+}
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 async function init() {
+  initTheme();
+
   const saved = localStorage.getItem(LOCAL_KEY);
   if (saved) {
     try { items = JSON.parse(saved); }
     catch { items = []; }
   } else {
-    // Load from JSON file the first time
     try {
       const res = await fetch('data/reading-list.json');
       items = await res.json();
-    } catch {
-      items = [];
-    }
+      // Normalize: ensure categories is always an array
+      items = items.map(normalizeItem);
+    } catch { items = []; }
   }
+
   renderAll();
+}
+
+function normalizeItem(item) {
+  // Convert old string category to array
+  if (typeof item.categories === 'string') {
+    item.categories = item.categories ? [item.categories] : [];
+  }
+  if (!Array.isArray(item.categories)) {
+    // migrate from old "category" field
+    const cats = (item.category || '').split(',').map(s => s.trim()).filter(Boolean);
+    item.categories = cats.length ? cats : ['Uncategorized'];
+    delete item.category;
+  }
+  if (item.hidden === undefined) item.hidden = false;
+  return item;
 }
 
 function save() {
@@ -38,15 +87,16 @@ function getFiltered() {
   return items
     .filter(item => {
       if (filterPriority !== 'all' && item.priority !== filterPriority) return false;
-      if (filterCategory !== 'all' && item.category !== filterCategory) return false;
+      if (filterCategory !== 'all' && !(item.categories || []).includes(filterCategory)) return false;
       if (filterCompleted === 'done' && !item.completed) return false;
       if (filterCompleted === 'todo' && item.completed) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
+        const cats = (item.categories || []).join(' ').toLowerCase();
         if (!item.title.toLowerCase().includes(q) &&
-            !item.authors.toLowerCase().includes(q) &&
-            !(item.category || '').toLowerCase().includes(q) &&
-            !(item.notes || '').toLowerCase().includes(q)) return false;
+            !(item.authors||'').toLowerCase().includes(q) &&
+            !cats.includes(q) &&
+            !(item.notes||'').toLowerCase().includes(q)) return false;
       }
       return true;
     })
@@ -62,17 +112,19 @@ function getFiltered() {
       } else if (sortKey === 'completed') {
         va = a.completed ? 1 : 0; vb = b.completed ? 1 : 0;
       } else {
-        va = (a[sortKey] || '').toString().toLowerCase();
-        vb = (b[sortKey] || '').toString().toLowerCase();
+        va = String(a[sortKey]||'').toLowerCase();
+        vb = String(b[sortKey]||'').toLowerCase();
       }
       if (va < vb) return -1 * sortDir;
-      if (va > vb) return 1 * sortDir;
+      if (va > vb) return  1 * sortDir;
       return 0;
     });
 }
 
-function getCategories() {
-  return [...new Set(items.map(i => i.category).filter(Boolean))].sort();
+function getAllCategories() {
+  const set = new Set();
+  items.forEach(i => (i.categories || []).forEach(c => set.add(c)));
+  return [...set].sort();
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────────────
@@ -80,33 +132,30 @@ function renderAll() {
   renderStats();
   renderProgress();
   renderCategorySelect();
-  renderTable();
   renderChips();
+  renderTable();
+  renderVisibilityBtn();
 }
 
 function renderStats() {
-  const total = items.length;
-  const done = items.filter(i => i.completed).length;
-  const high = items.filter(i => i.priority === 'red').length;
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-done').textContent = done;
-  document.getElementById('stat-high').textContent = high;
+  document.getElementById('stat-total').textContent = items.length;
+  document.getElementById('stat-done').textContent  = items.filter(i => i.completed).length;
+  document.getElementById('stat-high').textContent  = items.filter(i => i.priority === 'red').length;
 }
 
 function renderProgress() {
   const total = items.length;
-  const done = items.filter(i => i.completed).length;
-  const pct = total ? Math.round((done / total) * 100) : 0;
+  const done  = items.filter(i => i.completed).length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-label').textContent = pct + '% complete';
 }
 
 function renderCategorySelect() {
-  const sel = document.getElementById('filter-category');
-  const cur = sel.value;
-  const cats = getCategories();
+  const sel  = document.getElementById('filter-category');
+  const cats = getAllCategories();
   sel.innerHTML = `<option value="all">All categories</option>` +
-    cats.map(c => `<option value="${esc(c)}" ${c === cur ? 'selected' : ''}>${esc(c)}</option>`).join('');
+    cats.map(c => `<option value="${esc(c)}" ${c === filterCategory ? 'selected' : ''}>${esc(c)}</option>`).join('');
 }
 
 function renderChips() {
@@ -115,11 +164,23 @@ function renderChips() {
   });
 }
 
+function renderVisibilityBtn() {
+  const btn = document.getElementById('btn-visibility');
+  const hiddenCount = items.filter(i => i.hidden).length;
+  if (showHidden) {
+    btn.classList.add('active');
+    btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Show All (${hiddenCount} hidden)`;
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Show Hidden (${hiddenCount})`;
+  }
+}
+
 function renderTable() {
   const filtered = getFiltered();
   const tbody = document.getElementById('table-body');
 
-  // Update sort headers
+  // update sort icons
   document.querySelectorAll('th[data-sort]').forEach(th => {
     const active = th.dataset.sort === sortKey;
     th.classList.toggle('sorted', active);
@@ -127,78 +188,77 @@ function renderTable() {
     if (icon) icon.textContent = active ? (sortDir === 1 ? '↑' : '↓') : '↕';
   });
 
+  // toggle show-hidden class on tbody's parent
+  const tableWrap = document.querySelector('.table-wrap');
+  tableWrap.classList.toggle('show-hidden', showHidden);
+
   if (!filtered.length) {
     tbody.innerHTML = `
       <tr><td colspan="8">
         <div class="empty-state">
-          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+          <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
             <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
             <rect x="9" y="3" width="6" height="4" rx="1"/>
             <path d="M9 12h6M9 16h4"/>
           </svg>
           <h3>No papers found</h3>
-          <p>Try adjusting your filters or add a new paper.</p>
+          <p>Try adjusting your filters.</p>
         </div>
       </td></tr>`;
     return;
   }
 
-  tbody.innerHTML = filtered.map(item => `
-    <tr class="${item.completed ? 'completed' : ''}" data-id="${item.id}">
-      <td>
-        <div class="custom-check ${item.completed ? 'checked' : ''}" onclick="toggleComplete(${item.id})">
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="1 4 4 7 9 1"/>
-          </svg>
-        </div>
-      </td>
-      <td class="priority-cell">
-        <button class="priority-btn ${item.priority}" onclick="cyclePriority(${item.id})" title="Click to change priority"></button>
-      </td>
-      <td class="title-cell">
-        <span class="title-text">${esc(item.title)}</span>
-        <span class="authors-text">${esc(item.authors || '')}</span>
-      </td>
-      <td class="hide-mobile"><span class="year-text">${item.year || '—'}</span></td>
-      <td class="hide-mobile">
-        <span class="category-badge">${esc(item.category || 'Uncategorized')}</span>
-      </td>
-      <td>
-        <div class="link-group">
-          ${item.pdf
-            ? `<a href="${esc(item.pdf)}" class="link-btn pdf" target="_blank">
-                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M1 0h6l3 3v9H1V0zm6 0v3h3"/><path d="M3 7h4M3 9h2" stroke="currentColor" stroke-width="1" fill="none"/></svg>
-                PDF
-               </a>`
-            : `<span class="link-btn pdf disabled">PDF</span>`}
-          ${item.url
-            ? `<a href="${esc(item.url)}" class="link-btn url" target="_blank">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
-                  <path d="M7 1h4v4M11 1 5 7"/><path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8"/>
-                </svg>
-                URL
-               </a>`
-            : `<span class="link-btn url disabled">URL</span>`}
-        </div>
-      </td>
-      <td class="hide-mobile" style="max-width:160px; color:var(--text-muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(item.notes || '')}</td>
-      <td>
-        <div style="display:flex;gap:4px">
-          <button class="action-btn" onclick="openEdit(${item.id})" title="Edit">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+  tbody.innerHTML = filtered.map(item => {
+    const catBadges = (item.categories || ['Uncategorized']).map(c =>
+      `<span class="category-badge ${getCatColor(c)}">${esc(c)}</span>`
+    ).join('');
+
+    const hideBtn = item.hidden
+      ? `<button class="action-btn show-btn" onclick="toggleHidden(${item.id})" title="Make visible">Show</button>`
+      : `<button class="action-btn hide-btn" onclick="toggleHidden(${item.id})" title="Hide this entry">Hide</button>`;
+
+    return `
+      <tr class="${item.completed ? 'completed' : ''} ${item.hidden ? 'hidden-entry' : ''}" data-id="${item.id}">
+        <td>
+          <div class="custom-check ${item.completed ? 'checked' : ''}" onclick="toggleComplete(${item.id})">
+            <svg width="9" height="7" viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 3.5 3.5 6 8 1"/>
             </svg>
-          </button>
-          <button class="action-btn" onclick="deleteItem(${item.id})" title="Delete">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-            </svg>
-          </button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+          </div>
+        </td>
+        <td class="priority-cell">
+          <button class="priority-btn ${item.priority}" onclick="cyclePriority(${item.id})" title="Click to change priority"></button>
+        </td>
+        <td class="title-cell">
+          <span class="title-text">${esc(item.title)}</span>
+          <span class="authors-text">${esc(item.authors || '')}</span>
+        </td>
+        <td class="hide-mobile"><span class="year-text">${item.year || '—'}</span></td>
+        <td class="hide-mobile">
+          <div class="category-group">${catBadges}</div>
+        </td>
+        <td>
+          <div class="link-group">
+            ${item.pdf
+              ? `<a href="${esc(item.pdf)}" class="link-btn pdf" target="_blank">
+                  <svg width="10" height="11" viewBox="0 0 10 12" fill="currentColor"><path d="M1 0h6l3 3v9H1V0zm6 0v3h3"/><path d="M3 7h4M3 9h2" stroke="white" stroke-width="0.8" fill="none"/></svg>
+                  PDF</a>`
+              : `<span class="link-btn pdf disabled">PDF</span>`}
+            ${item.url
+              ? `<a href="${esc(item.url)}" class="link-btn url" target="_blank">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+                    <path d="M7 1h4v4M11 1 5 7"/><path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8"/>
+                  </svg>
+                  URL</a>`
+              : `<span class="link-btn url disabled">URL</span>`}
+          </div>
+        </td>
+        <td class="hide-mobile"><span class="notes-text">${esc(item.notes || '')}</span></td>
+        <td>
+          <div class="row-actions">${hideBtn}</div>
+        </td>
+      </tr>`;
+  }).join('');
 }
 
 // ─── ACTIONS ───────────────────────────────────────────────────────────────
@@ -216,10 +276,16 @@ function cyclePriority(id) {
   save(); renderAll();
 }
 
-function deleteItem(id) {
-  if (!confirm('Delete this entry?')) return;
-  items = items.filter(i => i.id !== id);
+function toggleHidden(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.hidden = !item.hidden;
   save(); renderAll();
+}
+
+function toggleShowHidden() {
+  showHidden = !showHidden;
+  renderAll();
 }
 
 function setSort(key) {
@@ -231,74 +297,6 @@ function setSort(key) {
 function setPriority(p) {
   filterPriority = p;
   renderAll();
-}
-
-// ─── MODAL ─────────────────────────────────────────────────────────────────
-function openAdd() {
-  editingId = null;
-  document.getElementById('modal-title').textContent = 'Add Paper';
-  clearForm();
-  setModalPriority('red');
-  document.getElementById('modal').classList.add('open');
-}
-
-function openEdit(id) {
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  editingId = id;
-  document.getElementById('modal-title').textContent = 'Edit Paper';
-  document.getElementById('f-title').value = item.title || '';
-  document.getElementById('f-authors').value = item.authors || '';
-  document.getElementById('f-year').value = item.year || '';
-  document.getElementById('f-category').value = item.category || '';
-  document.getElementById('f-pdf').value = item.pdf || '';
-  document.getElementById('f-url').value = item.url || '';
-  document.getElementById('f-notes').value = item.notes || '';
-  setModalPriority(item.priority || 'red');
-  document.getElementById('modal').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  editingId = null;
-}
-
-function clearForm() {
-  ['f-title','f-authors','f-year','f-category','f-pdf','f-url','f-notes'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-}
-
-let _selectedPriority = 'red';
-function setModalPriority(p) {
-  _selectedPriority = p;
-  document.querySelectorAll('.priority-pick-btn').forEach(btn => {
-    btn.classList.remove('selected-red','selected-yellow','selected-green');
-    if (btn.dataset.val === p) btn.classList.add('selected-' + p);
-  });
-}
-
-function saveItem() {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) { alert('Title is required.'); return; }
-  const data = {
-    title,
-    authors: document.getElementById('f-authors').value.trim(),
-    year: parseInt(document.getElementById('f-year').value) || null,
-    category: document.getElementById('f-category').value.trim() || 'Uncategorized',
-    pdf: document.getElementById('f-pdf').value.trim(),
-    url: document.getElementById('f-url').value.trim(),
-    notes: document.getElementById('f-notes').value.trim(),
-    priority: _selectedPriority,
-  };
-  if (editingId !== null) {
-    const idx = items.findIndex(i => i.id === editingId);
-    if (idx > -1) items[idx] = { ...items[idx], ...data };
-  } else {
-    const maxId = items.reduce((m, i) => Math.max(m, i.id || 0), 0);
-    items.push({ id: maxId + 1, completed: false, ...data });
-  }
-  save(); renderAll(); closeModal();
 }
 
 // ─── UTILS ─────────────────────────────────────────────────────────────────
@@ -325,15 +323,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filter-completed').addEventListener('change', e => {
     filterCompleted = e.target.value;
     renderTable();
-  });
-
-  // Close modal on overlay click
-  document.getElementById('modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('modal')) closeModal();
-  });
-
-  // ESC to close
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
   });
 });

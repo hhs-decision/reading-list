@@ -13,40 +13,54 @@
   <!-- ── HEADER ──────────────────────────────────────────────────── -->
   <header>
     <div class="header-top">
-      <div>
-        <div class="header-label">Research Papers</div>
-        <h1>Reading <span>List</span></h1>
+      <div class="header-left">
+        <div class="header-eyebrow">Research Papers</div>
+        <h1>Reading <em>List</em></h1>
       </div>
-      <div class="header-stats">
-        <div class="stat">
-          <div class="stat-num" id="stat-total">0</div>
-          <div class="stat-label">Total</div>
+
+      <div class="header-right">
+        <div class="header-stats">
+          <div class="stat">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-done">0</div>
+            <div class="stat-label">Done</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-high">0</div>
+            <div class="stat-label">High Pri</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="stat-num" id="stat-done">0</div>
-          <div class="stat-label">Done</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num" id="stat-high">0</div>
-          <div class="stat-label">High Pri</div>
-        </div>
+
+        <!-- ── Day / Night Toggle ─────────────────────────── -->
+        <button class="theme-toggle" onclick="toggleTheme()" title="Switch day / night mode">
+          <span class="theme-icon">☀️</span>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-thumb"></div>
+          </div>
+          <span class="theme-label" id="theme-label">Day</span>
+        </button>
       </div>
     </div>
-    <div style="margin-top:16px; display:flex; align-items:center; gap:12px;">
-      <div class="progress-bar-wrap" style="flex:1">
+
+    <!-- Progress -->
+    <div class="progress-row">
+      <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
       </div>
-      <span id="progress-label" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap">0% complete</span>
+      <span class="progress-label" id="progress-label">0% complete</span>
     </div>
   </header>
 
   <!-- ── TOOLBAR ─────────────────────────────────────────────────── -->
   <div class="toolbar">
     <div class="search-wrap">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input type="search" id="search" placeholder="Search by title, author, category…"/>
+      <input type="search" id="search" placeholder="Search title, author, category, notes…"/>
     </div>
 
     <select id="filter-category">
@@ -58,27 +72,27 @@
       <option value="todo">To read</option>
       <option value="done">Completed</option>
     </select>
-
-    <button class="btn-add" onclick="openAdd()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
-      Add Paper
-    </button>
   </div>
 
-  <!-- ── PRIORITY FILTER CHIPS ───────────────────────────────────── -->
+  <!-- ── FILTER CHIPS + VISIBILITY ───────────────────────────────── -->
   <div class="filter-row">
     <span class="filter-label">Priority</span>
-    <button class="chip active" data-priority="all" onclick="setPriority('all')">All</button>
-    <button class="chip" data-priority="red" onclick="setPriority('red')">
+    <button class="chip active" data-priority="all"    onclick="setPriority('all')">All</button>
+    <button class="chip"        data-priority="red"    onclick="setPriority('red')">
       <span class="chip-dot chip-dot-red"></span> High
     </button>
-    <button class="chip" data-priority="yellow" onclick="setPriority('yellow')">
+    <button class="chip"        data-priority="yellow" onclick="setPriority('yellow')">
       <span class="chip-dot chip-dot-yellow"></span> Medium
     </button>
-    <button class="chip" data-priority="green" onclick="setPriority('green')">
+    <button class="chip"        data-priority="green"  onclick="setPriority('green')">
       <span class="chip-dot chip-dot-green"></span> Low
+    </button>
+
+    <span style="flex:1"></span>
+
+    <!-- Visibility toggle — shows/hides hidden entries -->
+    <button class="btn-visibility" id="btn-visibility" onclick="toggleShowHidden()">
+      <!-- filled in by JS -->
     </button>
   </div>
 
@@ -87,20 +101,18 @@
     <table>
       <thead>
         <tr>
-          <th style="width:36px"></th>
-          <th style="width:48px" data-sort="priority" onclick="setSort('priority')">
+          <th style="width:34px"></th>
+          <th style="width:44px" data-sort="priority" onclick="setSort('priority')">
             Pri <span class="sort-icon">↕</span>
           </th>
           <th data-sort="title" onclick="setSort('title')">
             Title / Authors <span class="sort-icon">↕</span>
           </th>
-          <th class="hide-mobile" data-sort="year" onclick="setSort('year')" style="width:70px">
+          <th class="hide-mobile" data-sort="year" onclick="setSort('year')" style="width:68px">
             Year <span class="sort-icon">↕</span>
           </th>
-          <th class="hide-mobile" data-sort="category" onclick="setSort('category')" style="width:160px">
-            Category <span class="sort-icon">↕</span>
-          </th>
-          <th style="width:130px">Links</th>
+          <th class="hide-mobile" style="width:200px">Categories</th>
+          <th style="width:120px">Links</th>
           <th class="hide-mobile" style="width:160px">Notes</th>
           <th style="width:72px"></th>
         </tr>
@@ -112,71 +124,6 @@
   </div>
 
 </div><!-- /app-wrapper -->
-
-
-<!-- ── ADD / EDIT MODAL ─────────────────────────────────────────── -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modal-title">Add Paper</span>
-      <button class="modal-close" onclick="closeModal()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group full">
-        <label for="f-title">Title *</label>
-        <input class="form-input" id="f-title" type="text" placeholder="Paper title"/>
-      </div>
-      <div class="form-group">
-        <label for="f-authors">Authors</label>
-        <input class="form-input" id="f-authors" type="text" placeholder="Author et al."/>
-      </div>
-      <div class="form-group">
-        <label for="f-year">Year</label>
-        <input class="form-input" id="f-year" type="number" placeholder="2024" min="1900" max="2100"/>
-      </div>
-      <div class="form-group">
-        <label for="f-category">Category</label>
-        <input class="form-input" id="f-category" type="text" placeholder="Deep Learning, NLP…"/>
-      </div>
-      <div class="form-group">
-        <label>Priority</label>
-        <div class="priority-picker">
-          <button class="priority-pick-btn" data-val="red" onclick="setModalPriority('red')">
-            <span class="chip-dot chip-dot-red"></span> High
-          </button>
-          <button class="priority-pick-btn" data-val="yellow" onclick="setModalPriority('yellow')">
-            <span class="chip-dot chip-dot-yellow"></span> Med
-          </button>
-          <button class="priority-pick-btn" data-val="green" onclick="setModalPriority('green')">
-            <span class="chip-dot chip-dot-green"></span> Low
-          </button>
-        </div>
-      </div>
-      <div class="form-group full">
-        <label for="f-pdf">PDF Path <span style="color:var(--text-dim); font-size:10px">(e.g. pdfs/paper.pdf)</span></label>
-        <input class="form-input" id="f-pdf" type="text" placeholder="pdfs/my-paper.pdf"/>
-      </div>
-      <div class="form-group full">
-        <label for="f-url">Publication URL</label>
-        <input class="form-input" id="f-url" type="url" placeholder="https://arxiv.org/abs/…"/>
-      </div>
-      <div class="form-group full">
-        <label for="f-notes">Notes</label>
-        <input class="form-input" id="f-notes" type="text" placeholder="Short note about this paper…"/>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveItem()">Save Paper</button>
-    </div>
-  </div>
-</div>
 
 <script src="js/app.js"></script>
 </body>
