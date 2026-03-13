@@ -174,13 +174,24 @@ function renderProgress() {
 }
 
 function renderTagFilters() {
-  // Sync all dropdowns to current filterTags state and apply active styling
+  // Build options dynamically from all values present in items
   Object.keys(filterTags).forEach(dim => {
     const sel = document.getElementById(`ftag-${dim}`);
     if (!sel) return;
-    sel.value = filterTags[dim];
+
+    // Collect unique values for this dimension across all items
+    const vals = new Set();
+    items.forEach(item => (item.tags[dim] || []).forEach(v => vals.add(v)));
+    const sorted = [...vals].sort();
+
+    // Rebuild options (preserve current selection)
+    const current = filterTags[dim];
+    sel.innerHTML = `<option value="all">All</option>` +
+      sorted.map(v => `<option value="${esc(v)}" ${current === v ? 'selected' : ''}>${esc(v)}</option>`).join('');
+
     sel.classList.toggle('is-active', filterTags[dim] !== 'all');
   });
+
   // Show/hide reset button
   const hasActive = Object.values(filterTags).some(v => v !== 'all');
   const btn = document.getElementById('btn-reset-tags');
@@ -221,15 +232,8 @@ function renderTagBadges(item, dim) {
   const vals = (item.tags && item.tags[dim]) || [];
   if (!vals.length) return `<span class="tag-empty">—</span>`;
   return vals.map(v =>
-    `<span class="tag-badge ${getTagColor(dim, v)}" onclick="removeTag(${item.id},'${dim}','${v.replace(/'/g,"\\'")}');" title="クリックで削除">${esc(v)}</span>`
+    `<span class="tag-badge ${getTagColor(dim, v)}">${esc(v)}</span>`
   ).join('');
-}
-
-function renderAddTagBtn(item, dim) {
-  const available = TAG_SCHEMA[dim].options.filter(o => !(item.tags[dim]||[]).includes(o));
-  if (!available.length) return '';
-  const opts = available.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
-  return `<select class="tag-add-select" onchange="addTag(${item.id},'${dim}',this.value);this.value=''"><option value="">＋</option>${opts}</select>`;
 }
 
 function renderTable() {
@@ -291,12 +295,6 @@ function renderTable() {
         </td>
         <td class="hide-mobile"><span class="year-text">${item.year || '—'}</span></td>
         <td class="hide-mobile"><span class="journal-text">${esc(item.journal || '—')}</span></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'article_type')}${renderAddTagBtn(item,'article_type')}</div></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'species')}${renderAddTagBtn(item,'species')}</div></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'methods')}${renderAddTagBtn(item,'methods')}</div></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'roi')}${renderAddTagBtn(item,'roi')}</div></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'model')}${renderAddTagBtn(item,'model')}</div></td>
-        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'theory')}${renderAddTagBtn(item,'theory')}</div></td>
         <td>
           <div class="link-group">
             ${item.pdf
@@ -307,6 +305,12 @@ function renderTable() {
               : `<span class="link-btn url disabled">URL</span>`}
           </div>
         </td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'article_type')}</div></td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'species')}</div></td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'methods')}</div></td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'roi')}</div></td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'model')}</div></td>
+        <td class="tag-cell hide-mobile"><div class="tag-group">${renderTagBadges(item,'theory')}</div></td>
         <td class="hide-mobile notes-cell">${notesHtml}</td>
         <td><div class="row-actions">${hideBtn}</div></td>
       </tr>`;

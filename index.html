@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="app-wrapper">
- 
+
   <!-- ── HEADER ── -->
   <header>
     <div class="header-top">
@@ -36,7 +36,7 @@
       <span class="progress-label" id="progress-label">0% complete</span>
     </div>
   </header>
- 
+
   <!-- ── TOOLBAR ── -->
   <div class="toolbar">
     <div class="search-wrap">
@@ -51,7 +51,7 @@
       <option value="done">Completed</option>
     </select>
   </div>
- 
+
   <!-- ── TAG FILTER ROW ── -->
   <div class="tag-filter-row">
     <div class="tag-filter-group">
@@ -106,7 +106,7 @@
     </div>
     <button class="tag-filter-reset" id="btn-reset-tags" onclick="resetTagFilters()" style="display:none">✕ Reset filters</button>
   </div>
- 
+
   <!-- ── FILTER CHIPS ── -->
   <div class="filter-row">
     <span class="filter-label">Priority</span>
@@ -117,7 +117,7 @@
     <span style="flex:1"></span>
     <button class="btn-visibility" id="btn-visibility" onclick="toggleShowHidden()"></button>
   </div>
- 
+
   <!-- ── TABLE ── -->
   <div class="table-wrap">
     <table>
@@ -128,21 +128,21 @@
           <th data-sort="title" onclick="setSort('title')">Title / Authors <span class="sort-icon">↕</span></th>
           <th class="hide-mobile" data-sort="year" onclick="setSort('year')" style="width:60px">Year <span class="sort-icon">↕</span></th>
           <th class="hide-mobile" data-sort="journal" onclick="setSort('journal')" style="width:110px">Journal <span class="sort-icon">↕</span></th>
+          <th style="width:100px">Links</th>
           <th class="hide-mobile tag-col" style="width:90px">Journal Type</th>
           <th class="hide-mobile tag-col" style="width:90px">Species</th>
           <th class="hide-mobile tag-col" style="width:110px">Imaging</th>
-          <th class="hide-mobile tag-col" style="width:130px">ROI</th>
+          <th class="hide-mobile tag-col" style="width:150px">ROI</th>
           <th class="hide-mobile tag-col" style="width:100px">Model</th>
           <th class="hide-mobile tag-col" style="width:120px">Theory</th>
-          <th style="width:110px">Links</th>
-          <th class="hide-mobile" style="width:150px">Notes</th>
+          <th class="hide-mobile" style="width:180px">Notes</th>
           <th style="width:60px"></th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
     </table>
   </div>
- 
+
 </div>
 <script src="js/app.js"></script>
 </body>
