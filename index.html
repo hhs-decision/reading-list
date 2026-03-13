@@ -7,45 +7,28 @@
   <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-
 <div class="app-wrapper">
-
-  <!-- ── HEADER ──────────────────────────────────────────────────── -->
+ 
+  <!-- ── HEADER ── -->
   <header>
     <div class="header-top">
       <div class="header-left">
         <div class="header-eyebrow">Research Papers</div>
         <h1>Reading <em>List</em></h1>
       </div>
-
       <div class="header-right">
         <div class="header-stats">
-          <div class="stat">
-            <div class="stat-num" id="stat-total">0</div>
-            <div class="stat-label">Total</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="stat-done">0</div>
-            <div class="stat-label">Done</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="stat-high">0</div>
-            <div class="stat-label">High Pri</div>
-          </div>
+          <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+          <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label">Done</div></div>
+          <div class="stat"><div class="stat-num" id="stat-high">0</div><div class="stat-label">High Pri</div></div>
         </div>
-
-        <!-- ── Day / Night Toggle ─────────────────────────── -->
         <button class="theme-toggle" onclick="toggleTheme()" title="Switch day / night mode">
           <span class="theme-icon">☀️</span>
-          <div class="theme-toggle-track">
-            <div class="theme-toggle-thumb"></div>
-          </div>
+          <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
           <span class="theme-label" id="theme-label">Day</span>
         </button>
       </div>
     </div>
-
-    <!-- Progress -->
     <div class="progress-row">
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -53,81 +36,114 @@
       <span class="progress-label" id="progress-label">0% complete</span>
     </div>
   </header>
-
-  <!-- ── TOOLBAR ─────────────────────────────────────────────────── -->
+ 
+  <!-- ── TOOLBAR ── -->
   <div class="toolbar">
     <div class="search-wrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input type="search" id="search" placeholder="Search title, author, category, notes…"/>
+      <input type="search" id="search" placeholder="Search title, author, tags, notes…"/>
     </div>
-
-    <select id="filter-category">
-      <option value="all">All categories</option>
-    </select>
-
     <select id="filter-completed">
       <option value="all">All status</option>
       <option value="todo">To read</option>
       <option value="done">Completed</option>
     </select>
   </div>
-
-  <!-- ── FILTER CHIPS + VISIBILITY ───────────────────────────────── -->
+ 
+  <!-- ── TAG FILTER ROW ── -->
+  <div class="tag-filter-row">
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">Journal Type</label>
+      <select id="ftag-article_type" class="tag-filter-select" onchange="setTagFilter('article_type',this.value)">
+        <option value="all">All</option>
+        <option value="research">research</option>
+        <option value="review">review</option>
+      </select>
+    </div>
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">Species</label>
+      <select id="ftag-species" class="tag-filter-select" onchange="setTagFilter('species',this.value)">
+        <option value="all">All</option>
+        <option value="human">human</option>
+        <option value="primates">primates</option>
+        <option value="rodents">rodents</option>
+      </select>
+    </div>
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">Imaging</label>
+      <select id="ftag-methods" class="tag-filter-select" onchange="setTagFilter('methods',this.value)">
+        <option value="all">All</option>
+        <option value="3T-MRI">3T-MRI</option>
+        <option value="7T-MRI">7T-MRI</option>
+        <option value="calcium imaging">calcium imaging</option>
+      </select>
+    </div>
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">ROI</label>
+      <select id="ftag-roi" class="tag-filter-select" onchange="setTagFilter('roi',this.value)">
+        <option value="all">All</option>
+        <option value="hippocampus">hippocampus</option>
+        <option value="CA1">CA1</option>
+        <option value="language network">language network</option>
+        <option value="AngG">AngG</option>
+      </select>
+    </div>
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">Model</label>
+      <select id="ftag-model" class="tag-filter-select" onchange="setTagFilter('model',this.value)">
+        <option value="all">All</option>
+        <option value="transformer">transformer</option>
+      </select>
+    </div>
+    <div class="tag-filter-group">
+      <label class="tag-filter-label">Theory</label>
+      <select id="ftag-theory" class="tag-filter-select" onchange="setTagFilter('theory',this.value)">
+        <option value="all">All</option>
+        <option value="predictive coding">predictive coding</option>
+      </select>
+    </div>
+    <button class="tag-filter-reset" id="btn-reset-tags" onclick="resetTagFilters()" style="display:none">✕ Reset filters</button>
+  </div>
+ 
+  <!-- ── FILTER CHIPS ── -->
   <div class="filter-row">
     <span class="filter-label">Priority</span>
     <button class="chip active" data-priority="all"    onclick="setPriority('all')">All</button>
-    <button class="chip"        data-priority="red"    onclick="setPriority('red')">
-      <span class="chip-dot chip-dot-red"></span> High
-    </button>
-    <button class="chip"        data-priority="yellow" onclick="setPriority('yellow')">
-      <span class="chip-dot chip-dot-yellow"></span> Medium
-    </button>
-    <button class="chip"        data-priority="green"  onclick="setPriority('green')">
-      <span class="chip-dot chip-dot-green"></span> Low
-    </button>
-
+    <button class="chip"        data-priority="red"    onclick="setPriority('red')"><span class="chip-dot chip-dot-red"></span> High</button>
+    <button class="chip"        data-priority="yellow" onclick="setPriority('yellow')"><span class="chip-dot chip-dot-yellow"></span> Medium</button>
+    <button class="chip"        data-priority="green"  onclick="setPriority('green')"><span class="chip-dot chip-dot-green"></span> Low</button>
     <span style="flex:1"></span>
-
-    <!-- Visibility toggle — shows/hides hidden entries -->
-    <button class="btn-visibility" id="btn-visibility" onclick="toggleShowHidden()">
-      <!-- filled in by JS -->
-    </button>
+    <button class="btn-visibility" id="btn-visibility" onclick="toggleShowHidden()"></button>
   </div>
-
-  <!-- ── TABLE ───────────────────────────────────────────────────── -->
+ 
+  <!-- ── TABLE ── -->
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
           <th style="width:34px"></th>
-          <th style="width:44px" data-sort="priority" onclick="setSort('priority')">
-            Pri <span class="sort-icon">↕</span>
-          </th>
-          <th data-sort="title" onclick="setSort('title')">
-            Title / Authors <span class="sort-icon">↕</span>
-          </th>
-          <th class="hide-mobile" data-sort="year" onclick="setSort('year')" style="width:68px">
-            Year <span class="sort-icon">↕</span>
-          </th>
-          <th class="hide-mobile" data-sort="journal" onclick="setSort('journal')" style="width:140px">
-            Journal <span class="sort-icon">↕</span>
-          </th>
-          <th class="hide-mobile" style="width:200px">Categories</th>
-          <th style="width:120px">Links</th>
-          <th class="hide-mobile" style="width:160px">Notes</th>
-          <th style="width:72px"></th>
+          <th style="width:44px" data-sort="priority" onclick="setSort('priority')">Pri <span class="sort-icon">↕</span></th>
+          <th data-sort="title" onclick="setSort('title')">Title / Authors <span class="sort-icon">↕</span></th>
+          <th class="hide-mobile" data-sort="year" onclick="setSort('year')" style="width:60px">Year <span class="sort-icon">↕</span></th>
+          <th class="hide-mobile" data-sort="journal" onclick="setSort('journal')" style="width:110px">Journal <span class="sort-icon">↕</span></th>
+          <th class="hide-mobile tag-col" style="width:90px">Journal Type</th>
+          <th class="hide-mobile tag-col" style="width:90px">Species</th>
+          <th class="hide-mobile tag-col" style="width:110px">Imaging</th>
+          <th class="hide-mobile tag-col" style="width:130px">ROI</th>
+          <th class="hide-mobile tag-col" style="width:100px">Model</th>
+          <th class="hide-mobile tag-col" style="width:120px">Theory</th>
+          <th style="width:110px">Links</th>
+          <th class="hide-mobile" style="width:150px">Notes</th>
+          <th style="width:60px"></th>
         </tr>
       </thead>
-      <tbody id="table-body">
-        <!-- rows rendered by JS -->
-      </tbody>
+      <tbody id="table-body"></tbody>
     </table>
   </div>
-
-</div><!-- /app-wrapper -->
-
+ 
+</div>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -738,3 +738,173 @@ td { padding: 13px 16px; vertical-align: middle; }
   .header-stats { display: none; }
   .row-actions { opacity: 1; }
 }
+
+/* ═══════════════════════════════════════════════════
+   TAG BADGES — structured columns
+═══════════════════════════════════════════════════ */
+.tag-cell { vertical-align: top; padding-top: 10px !important; }
+.tag-col  { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-dim); }
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+
+.tag-empty {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: opacity var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+.tag-badge:hover { opacity: 0.7; transform: scale(0.95); }
+
+/* article_type */
+.tag-research   { background: rgba(89,110,121,0.14); color: var(--accent); border: 1px solid rgba(89,110,121,0.22); }
+.tag-review     { background: rgba(125,92,69,0.14);  color: var(--accent2); border: 1px solid rgba(125,92,69,0.22); }
+
+/* species */
+.tag-human      { background: rgba(52,120,190,0.12); color: #2a6fa8; border: 1px solid rgba(52,120,190,0.25); }
+.tag-primates   { background: rgba(130,80,160,0.12); color: #7340a0; border: 1px solid rgba(130,80,160,0.25); }
+.tag-rodents    { background: rgba(180,110,40,0.12); color: #a06020; border: 1px solid rgba(180,110,40,0.25); }
+
+/* methods */
+.tag-3tmri      { background: rgba(40,160,140,0.12); color: #1a8f7c; border: 1px solid rgba(40,160,140,0.25); }
+.tag-7tmri      { background: rgba(20,130,170,0.12); color: #0e7899; border: 1px solid rgba(20,130,170,0.25); }
+.tag-calcium    { background: rgba(200,70,70,0.12);  color: #b03030; border: 1px solid rgba(200,70,70,0.25); }
+
+/* roi */
+.tag-hippo      { background: rgba(90,140,70,0.12);  color: #4a8020; border: 1px solid rgba(90,140,70,0.25); }
+.tag-ca1        { background: rgba(110,160,60,0.12); color: #5a9010; border: 1px solid rgba(110,160,60,0.25); }
+.tag-langnet    { background: rgba(180,80,120,0.12); color: #a04070; border: 1px solid rgba(180,80,120,0.25); }
+.tag-angg       { background: rgba(160,90,160,0.12); color: #8040a0; border: 1px solid rgba(160,90,160,0.25); }
+
+/* model */
+.tag-transformer { background: rgba(50,50,200,0.10); color: #2030c0; border: 1px solid rgba(50,50,200,0.22); }
+
+/* theory */
+.tag-predcoding  { background: rgba(200,140,20,0.12); color: #a07010; border: 1px solid rgba(200,140,20,0.25); }
+
+/* default fallback */
+.tag-default     { background: var(--accent-light); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Night mode tag overrides for readability */
+[data-theme="night"] .tag-human      { color: #6ab0e8; background: rgba(52,120,190,0.18); }
+[data-theme="night"] .tag-primates   { color: #c090e8; background: rgba(130,80,160,0.18); }
+[data-theme="night"] .tag-rodents    { color: #e0a860; background: rgba(180,110,40,0.18); }
+[data-theme="night"] .tag-3tmri      { color: #50d8b8; background: rgba(40,160,140,0.18); }
+[data-theme="night"] .tag-7tmri      { color: #50c8e8; background: rgba(20,130,170,0.18); }
+[data-theme="night"] .tag-calcium    { color: #e88080; background: rgba(200,70,70,0.18); }
+[data-theme="night"] .tag-hippo      { color: #90d060; background: rgba(90,140,70,0.18); }
+[data-theme="night"] .tag-ca1        { color: #a8e050; background: rgba(110,160,60,0.18); }
+[data-theme="night"] .tag-langnet    { color: #e890b8; background: rgba(180,80,120,0.18); }
+[data-theme="night"] .tag-angg       { color: #d080e0; background: rgba(160,90,160,0.18); }
+[data-theme="night"] .tag-transformer { color: #8090f8; background: rgba(50,50,200,0.18); }
+[data-theme="night"] .tag-predcoding  { color: #e8c050; background: rgba(200,140,20,0.18); }
+[data-theme="night"] .tag-research    { color: var(--accent2); background: rgba(199,177,152,0.12); }
+[data-theme="night"] .tag-review      { color: var(--accent);  background: rgba(223,211,195,0.10); }
+
+/* ── Add-tag select ── */
+.tag-add-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px dashed var(--border2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+  outline: none;
+}
+.tag-add-select:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════
+   TAG FILTER ROW — 6 individual dropdowns
+═══════════════════════════════════════════════════ */
+.tag-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 14px;
+  padding: 10px 24px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.tag-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tag-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding-left: 2px;
+}
+
+.tag-filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 5px 26px 5px 9px;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  min-width: 110px;
+}
+
+.tag-filter-select:hover  { border-color: var(--accent); }
+.tag-filter-select:focus  { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+/* Highlight when a filter is active (non-all) */
+.tag-filter-select.is-active {
+  border-color: var(--accent);
+  background-color: var(--accent-light);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.tag-filter-reset {
+  align-self: flex-end;
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  border-radius: 6px;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 5px 11px;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  margin-left: 4px;
+}
+.tag-filter-reset:hover { opacity: 0.75; }
+
+@media (max-width: 768px) {
+  .tag-filter-row { padding: 8px 12px; gap: 6px 10px; }
+  .tag-filter-select { min-width: 90px; font-size: 11px; }
+}
